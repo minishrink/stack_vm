@@ -1,2 +1,4 @@
 # stack_vm
-VM to interpret J5, a stack machine instruction set designed for educational purposes
+
+Minimal VM to emulate a small subset of JVM bytecode for my dissertation,
+which investigates instruction-level parallelism of stack machine code.
