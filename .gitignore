@@ -10,6 +10,10 @@
 
 # ocamlbuild working directory
 _build/
+# other dirs to ignore
+dots/*
+!.keep
+imgs/*
 
 # ocamlbuild targets
 *.byte
@@ -26,3 +30,4 @@ setup.log
 # Python bytecode
 .pyc
 __pycache__/*
+
