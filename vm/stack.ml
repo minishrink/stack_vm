@@ -1,9 +1,5 @@
 
-module type Value = sig
-  type t
-end
-
-module Stack (V : Value) = struct
+module Stack (V : Machine.Value) = struct
 
   exception StackDepth of int
   let stack_depth i = raise (StackDepth i)
