@@ -1,9 +1,6 @@
 
 module Stack (V : Machine.Value) = struct
 
-  exception StackDepth of int
-  let stack_depth i = raise (StackDepth i)
-
   let stack = object
     val mutable s : V.t list = []
 
@@ -32,8 +29,10 @@ module Stack (V : Machine.Value) = struct
       | _ -> ()
   end
 
+  exception StackDepth of int
+  let insufficient_depth i = raise (StackDepth i)
 
-  let depth () = List.length stack#get
+  let depth stack = List.length stack#get
 
   let empty = match stack#get with
     | [] -> true
@@ -42,11 +41,17 @@ module Stack (V : Machine.Value) = struct
   let bin_op fn = match stack#get with
     | top :: next :: rest ->
       stack#set ((fn top next)::rest)
-    | lst -> stack_depth (depth ())
+    | lst -> insufficient_depth (depth stack)
 
   let un_op fn = match stack#get with
     | top :: rest ->
       stack#set ((fn top)::rest)
-    | lst -> stack_depth (depth ())
+    | lst -> insufficient_depth (depth stack)
+
+  let dup = stack#dup
+
+  let swap = stack#swap
+
+  let peek = stack#peek
 
 end
