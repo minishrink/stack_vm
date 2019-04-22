@@ -12,8 +12,9 @@
 _build/
 # other dirs to ignore
 dots/*
+data/*
 !.keep
-imgs/*
+graphs/*
 
 # ocamlbuild targets
 *.byte
