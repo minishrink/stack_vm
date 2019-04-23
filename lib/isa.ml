@@ -12,15 +12,24 @@ module Instructions (T : Type) = struct
     let err = (String.concat " " instruction) in
     raise (ParseError err)
 
+  type stack_manip =
+    | DUP
+    | SWAP
+
   type memory_access =
     | LOAD of T.t
     | STORE of T.t
+    | ARRAY of string
 
   type alu =
     | ADD
     | SUB
     | MUL
     | DIV
+    | AND
+    | OR
+    | XOR
+    | NEG
     | IINC of (T.t * T.t)
 
   type variable =
@@ -39,11 +48,16 @@ module Instructions (T : Type) = struct
     | Mem of memory_access
     | Alu of alu
     | Flow of control_flow
+    | Manip of stack_manip
     | NOP
 
   module Printer = struct
 
     let concat str x = str ^ " " ^ (T.to_string x)
+
+    let manip_string = function
+      | DUP -> "DUP"
+      | SWAP -> "SWAP"
 
     let flow_string = function
       | RETURN ->"RETURN"
@@ -54,6 +68,7 @@ module Instructions (T : Type) = struct
     let mem_string = function
       | LOAD n -> concat "LOAD" n
       | STORE n -> concat "STORE" n
+      | ARRAY s -> "ARRAY " ^ s
 
     let var_string = function
       | CONST n -> concat "CONST" n
@@ -64,6 +79,10 @@ module Instructions (T : Type) = struct
       | SUB -> "SUB"
       | MUL -> "MUL"
       | DIV -> "DIV"
+      | AND -> "AND"
+      | OR -> "OR"
+      | XOR -> "XOR"
+      | NEG -> "NEG"
       | IINC (s,t) -> concat (concat "IINC" s) t
 
     let to_string = function
@@ -72,6 +91,7 @@ module Instructions (T : Type) = struct
       | Alu i -> alu_string i
       | NOP -> "NOP"
       | Flow i -> flow_string i
+      | Manip sm -> manip_string sm
 
   end
 end

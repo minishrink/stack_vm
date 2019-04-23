@@ -6,14 +6,17 @@ open INT
 type intermediate_representation =
   | Implicit of string
   | Explicit of (string * T.t)
-  | Special of (string * T.t * T.t)
+  | CISC of (string * T.t * T.t)
+  | Object of (string * string)
 
 let string_of_ir = function
   | Implicit s -> s
   | Explicit (s,t) ->
     Printf.sprintf "%s %s" s (T.to_string t)
-  | Special (s,t,u) ->
+  | CISC (s,t,u) ->
     Printf.sprintf "%s %s %s" s (T.to_string t) (T.to_string u)
+  | Object (dec,t) ->
+    Printf.sprintf "%s %s" dec t
 
 type result =
   | Instruction of instruction
@@ -28,13 +31,17 @@ exception ParseFailure of string
 let parse_fail str = raise (ParseFailure str)
 let list_to_string lst = String.concat "," lst
 
+let object_decs = ["newarray"; "aload"; "astore"; "iaload"; "iastore"]
+
 let opcode_and_operands = function
+  | [ opcode ; operand ] when List.mem opcode object_decs
+    -> Object (opcode, operand)
   | [ opcode ; operand ]
     -> Explicit (opcode, T.of_string operand)
   | [ opcode ]
     -> Implicit opcode
-  | [ one ; two ;three ]
-    -> Special (one, T.of_string two, T.of_string three)
+  | [ one ; two ;three ] when one="iinc"
+    -> CISC (one, T.of_string two, T.of_string three)
   | lst -> parse_fail (list_to_string lst)
 
 let unwrap_monad fn = function
@@ -49,6 +56,7 @@ let parse_memory ops =
   let parse = function
     | Explicit ("iload",  num) -> Mem (LOAD num)
     | Explicit ("istore", num) -> Mem (STORE num)
+    | Object ("newarray", t) -> Mem (ARRAY t)
     | _ -> parse_fail "parse_memory"
   in try_parse parse ops
 
@@ -58,6 +66,13 @@ let parse_variable ops =
     | Explicit ("iconst",num) -> Var (CONST num)
     | Explicit ("bipush",num | "sipush", num) -> Var (PUSH num)
     | _ -> parse_fail "parse_variable"
+  in try_parse parse ops
+
+let parse_manip ops =
+  let parse = function
+    | Implicit "dup" -> Manip (DUP)
+    | Implicit "swap" -> Manip (SWAP)
+    | _ -> parse_fail "parse_manip"
   in try_parse parse ops
 
 let parse_explicit ops =
@@ -71,7 +86,7 @@ let parse_alu op =
     | Implicit "isub" -> Alu SUB
     | Implicit "imul" -> Alu MUL
     | Implicit "idiv" -> Alu DIV
-    | Special ("iinc", mem, incr) -> Alu (IINC (mem, incr))
+    | CISC ("iinc", mem, incr) -> Alu (IINC (mem, incr))
     | _ -> parse_fail "parse_alu"
   in try_parse parse op
 
@@ -84,10 +99,17 @@ let parse_flow op =
     | _ -> parse_fail "parse_flow"
   in try_parse parse op
 
+let implicit_parsers =
+  [ parse_alu
+  ; parse_flow
+  ; parse_manip
+  ]
+
 let parse_implicit ops =
-  ops
-  |> unwrap_monad parse_alu
-  |> unwrap_monad parse_flow
+  List.fold_left
+    (fun monad parse_fn -> unwrap_monad parse_fn monad)
+    ops
+    implicit_parsers
 
 let parse (line : string list) =
   let tokens = opcode_and_operands line in
