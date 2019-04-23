@@ -1,5 +1,5 @@
 
-module Stack (V : Machine.Value) = struct
+module Make (V : Machine.Value) = struct
 
   let stack = object
     val mutable s : V.t list = []
@@ -41,12 +41,12 @@ module Stack (V : Machine.Value) = struct
   let bin_op fn = match stack#get with
     | top :: next :: rest ->
       stack#set ((fn top next)::rest)
-    | lst -> insufficient_depth (depth stack)
+    | _ -> insufficient_depth (depth stack)
 
   let un_op fn = match stack#get with
     | top :: rest ->
       stack#set ((fn top)::rest)
-    | lst -> insufficient_depth (depth stack)
+    | _ -> insufficient_depth (depth stack)
 
   let dup = stack#dup
 
@@ -54,4 +54,7 @@ module Stack (V : Machine.Value) = struct
 
   let peek = stack#peek
 
+  let push x = stack#push x
+
+  let pop = stack#pop
 end
