@@ -1,20 +1,19 @@
 
-module INT = Isa.IntSet
-module T = Isa.IntOps
+module INT = Isa.Instructions
 open INT
 
 type intermediate_representation =
   | Implicit of string
-  | Explicit of (string * T.t)
-  | CISC of (string * T.t * T.t)
+  | Explicit of (string * int)
+  | CISC of (string * int * int)
   | Object of (string * string)
 
 let string_of_ir = function
   | Implicit s -> s
   | Explicit (s,t) ->
-    Printf.sprintf "%s %s" s (T.to_string t)
+    Printf.sprintf "%s %s" s (string_of_int t)
   | CISC (s,t,u) ->
-    Printf.sprintf "%s %s %s" s (T.to_string t) (T.to_string u)
+    Printf.sprintf "%s %s %s" s (string_of_int t) (string_of_int u)
   | Object (dec,t) ->
     Printf.sprintf "%s %s" dec t
 
@@ -37,11 +36,11 @@ let opcode_and_operands = function
   | [ opcode ; operand ] when List.mem opcode object_decs
     -> Object (opcode, operand)
   | [ opcode ; operand ]
-    -> Explicit (opcode, T.of_string operand)
+    -> Explicit (opcode, int_of_string operand)
   | [ opcode ]
     -> Implicit opcode
   | [ one ; two ;three ] when one="iinc"
-    -> CISC (one, T.of_string two, T.of_string three)
+    -> CISC (one, int_of_string two, int_of_string three)
   | lst -> parse_fail (list_to_string lst)
 
 let unwrap_monad fn = function

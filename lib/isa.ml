@@ -1,12 +1,4 @@
-module type Type = sig
-  type t
-  val c : char
-  val of_string : string -> t
-  val to_string : t -> string
-end
-
-module Instructions (T : Type) = struct
-  include T
+module Instructions = struct
   exception ParseError of string
   let parse_error instruction =
     let err = (String.concat " " instruction) in
@@ -17,8 +9,8 @@ module Instructions (T : Type) = struct
     | SWAP
 
   type memory_access =
-    | LOAD of T.t
-    | STORE of T.t
+    | LOAD of int
+    | STORE of int
     | ARRAY of string
 
   type alu =
@@ -30,18 +22,18 @@ module Instructions (T : Type) = struct
     | OR
     | XOR
     | NEG
-    | IINC of (T.t * T.t)
+    | IINC of (int * int)
 
   type variable =
-    | CONST of T.t
-    | PUSH of T.t
+    | CONST of int
+    | PUSH of int
 
-  (* T.t should just be hardwired as int tbh *)
+  (* int should just be hardwired as int tbh *)
   type control_flow =
     | RETURN
     | GOTO
-    | IF_GT of T.t
-    | IF_GE of T.t
+    | IF_GT of int
+    | IF_GE of int
 
   type instruction =
     | Var of variable
@@ -53,7 +45,7 @@ module Instructions (T : Type) = struct
 
   module Printer = struct
 
-    let concat str x = str ^ " " ^ (T.to_string x)
+    let concat str x = str ^ " " ^ (string_of_int x)
 
     let manip_string = function
       | DUP -> "DUP"
@@ -95,12 +87,3 @@ module Instructions (T : Type) = struct
 
   end
 end
-
-module IntOps : Type = struct
-  type t = int
-  let of_string = int_of_string
-  let to_string = string_of_int
-  let c = 'i'
-end
-
-module IntSet = Instructions(IntOps : Type)
