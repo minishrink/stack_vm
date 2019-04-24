@@ -1,6 +1,7 @@
 
 module type Value = sig
   type t
-  type m
+  val to_string : t -> string
+  val of_string : string -> t
 end
 

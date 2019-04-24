@@ -32,7 +32,7 @@ let list_to_string lst = String.concat "," lst
 
 let object_decs = ["newarray"; "aload"; "astore"; "iaload"; "iastore"]
 
-let opcode_and_operands = function
+let decode = function
   | [ opcode ; operand ] when List.mem opcode object_decs
     -> Object (opcode, operand)
   | [ opcode ; operand ]
@@ -91,7 +91,7 @@ let parse_alu op =
 
 let parse_flow op =
   let parse = function
-    | Implicit ("ireturn" | "return") -> Flow RETURN
+    | Implicit ("ireturn" | "return" | "invokevirtual" | "invokespecial" | "invokeinterface") -> Flow RETURN
     | Implicit ("goto") -> Flow GOTO
     | Explicit ("icmpgt",l) -> Flow (IF_GT l)
     | Explicit ("icmpge",l) -> Flow (IF_GE l)
@@ -111,7 +111,7 @@ let parse_implicit ops =
     implicit_parsers
 
 let parse (line : string list) =
-  let tokens = opcode_and_operands line in
+  let tokens = decode line in
   let ir = Unparsed tokens in
   match ir with
   | Unparsed (Explicit _) as expr ->

@@ -81,9 +81,9 @@ module Instructions = struct
       | Mem i -> mem_string i
       | Var i -> var_string i
       | Alu i -> alu_string i
-      | NOP -> "NOP"
       | Flow i -> flow_string i
       | Manip sm -> manip_string sm
+      | _ -> "NOP"
 
   end
 end

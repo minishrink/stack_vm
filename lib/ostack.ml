@@ -19,13 +19,15 @@ let test line =
   |> print_endline
 
 let test_parsing code =
+  print_endline "\n===<BEGIN BLOCK>===";
   try
     code
     |> INT.parse_to_string
-    |> List.iter print_endline
+    |> List.iter (fun str -> ("  " ^ str) |> print_endline);
+  print_endline "===<END BLOCK>===\n"
   with e -> raise e
 
 let _ =
-  test_parsing Example.fact_ex;
+  List.iter test_parsing Example.([fact_ex; list_code]);
   print_endline "Successful parsing!"
 
