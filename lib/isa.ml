@@ -85,5 +85,7 @@ module Instructions = struct
       | Manip sm -> manip_string sm
       | _ -> "NOP"
 
+    let to_string i = try to_string i with _ -> "FUCK"
+
   end
 end

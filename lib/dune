@@ -1,5 +1,5 @@
 (executable
   (name ostack)
   (libraries ocamlgraph alcotest)
-  (modules graphbuild ostack example stringtrim isa int_parser)
+  (modules graphbuild ostack example stringtrim isa int_parser blocks)
 )
