@@ -73,12 +73,14 @@ module Instructions (T : Type) = struct
       | NOP -> "NOP"
       | Flow i -> flow_string i
 
+    let to_string i = try to_string i with _ -> "FUCK"
+
   end
 end
 
 module IntOps : Type = struct
   type t = int
-  let of_string = int_of_string
+  let of_string x = try int_of_string x with _ -> 0
   let to_string = string_of_int
   let c = 'i'
 end

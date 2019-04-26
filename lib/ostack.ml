@@ -20,12 +20,14 @@ let test line =
 
 let test_parsing code =
   try
+    print_endline "PROGRAM: BEGIN";
     code
-    |> INT.parse_to_string
-    |> List.iter print_endline
+    |> Blocks.parse_to_blockstring
+    |> print_endline;
+    print_endline "PROGRAM: END"
   with e -> raise e
 
 let _ =
-  test_parsing Example.fact_ex;
+  List.iter test_parsing Example.([fact_ex; example_code; list_code]);
   print_endline "Successful parsing!"
 
